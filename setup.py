@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='Scrapthor',
-    version='0.1.0',
+    version='0.1.4',
     author='Antonio Jose Donis Hung',
     author_email='antoniojosedonishung@gmail.com.com',
     packages=['scrapthor'],
