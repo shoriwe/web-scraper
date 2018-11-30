@@ -54,7 +54,7 @@ async def mapear(url, profundidad, parametros, descargar_archivos, guardar_links
                 chdir(directorio)
                 try:
                     if link != url:
-                        print(link)
+                        
                         informacion = await aio_descargar(link)
                         hashes = hash_y_archivo(hashes, informacion[1], informacion[2], parametros,descargar_archivos, guardar_hashes)
                         _loop.create_task(mapear(link,profundidad-1,parametros,descargar_archivos,guardar_links,guardar_hashes,informacion))
