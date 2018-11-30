@@ -1,6 +1,6 @@
 from os import mkdir, chdir, getcwd
 from os.path import join
-from asyncio import get_event_loop,ProtoactorEventLoop
+from asyncio import get_event_loop,ProtoactorEventLoop,sleep
 from sys import platform
 from .criptografia import fingerprint
 from .descargar import _extraer_links,aio_descargar,filtro,_guardar_hashes,_guardar_links,_crear_archivo
@@ -55,6 +55,7 @@ async def mapear(url, profundidad, parametros, descargar_archivos, guardar_links
             if guardar_links:
                 _guardar_links(links)
             for link in links:
+                await sleep(profundidad/3)
                 chdir(directorio)
                 try:
                     if link != url:
