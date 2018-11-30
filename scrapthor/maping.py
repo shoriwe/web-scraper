@@ -1,10 +1,14 @@
-from os import mkdir, chdir, getcwd, listdir
+from os import mkdir, chdir, getcwd
 from os.path import join
-from asyncio import get_event_loop, sleep, wait
+from asyncio import get_event_loop,ProtoactorEventLoop
+from sys import platform
 from .criptografia import fingerprint
 from .descargar import _extraer_links,aio_descargar,filtro,_guardar_hashes,_guardar_links,_crear_archivo
 
-_loop = get_event_loop()
+if platform == 'win32':
+    _loop = ProtoactorEventLoop()
+else:
+    _loop = get_event_loop()
 
 ###Crea un directorio y luego cd en el
 def crear_mantener_directorio(directorio):
