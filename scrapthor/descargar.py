@@ -1,13 +1,15 @@
 from requests import get
 from bs4 import BeautifulSoup
 from re import compile
+from aiohttp import ClientSession
+from asyncio import sleep
+from json import dumps
 
 ###Clase  filtros que ayuda a crear un diccionario para la parte de parametros
 class  filtros(dict):
-    def __init__(self):
-        pass
     def ig_formato(self,valores:list):
         self['ig_formato']=valores
+
     def formato(self,valores: list):
         self['formato'] = valores
 
@@ -88,7 +90,7 @@ def _formato(x):
     return r.search(x).group().replace('?', '')
 
 ###Funcion de filtro (determinar si un archivo se puede procesar o no)
-def __filtro(nombre, contenido, ignorar: dict,filter=filtros__):
+def filtro(nombre, contenido, ignorar: dict,filter=filtros__):
     n = []
     for valor in ignorar.keys():
         n.append(getattr(filter, valor)(nombre, contenido, ignorar[valor]))
@@ -97,9 +99,10 @@ def __filtro(nombre, contenido, ignorar: dict,filter=filtros__):
     else:
         return any(n)
 
-###funcion que ayuda a la funcion de _sacar_nombre_y_contenido para quee asi se pueda determinar que la extension no es
+###funcion que ayuda a la funcion de extraer_nombre para quee asi se pueda determinar que la extension no es
 ###un dominio web
-def __dominios(nombre: str, dominios='org,com,co,net,gov,edu,info,xyz,ly'.split(',')):
+def __dominios(nombre: str, dominios='org,com,co,net,gov,edu,info,xyz,ly'):
+    dominios=dominios.split(',')
     for dominio in dominios:
         if dominio == nombre.split('.')[-1]:
             return False
@@ -107,22 +110,18 @@ def __dominios(nombre: str, dominios='org,com,co,net,gov,edu,info,xyz,ly'.split(
 
 ###Funcion que se utiliza para sacar el nombre de la carpeta en donde se guardaran los archivos si el resultado del
 ###archivo es .html, para sacar el nombre y formato del archivo, para sacar el contenido del archivo en si
-def _sacar_nombre_y_contenido(url):
-    try:
-        data = get(url)
-        if '.' in url.split('/')[-1] and __dominios(url.split('/')[-1]):
-            nombre = _formato(url.split('/')[-1])
+async def extraer_nombre(url):
+    if '.' in url.split('/')[-1] and __dominios(url.split('/')[-1]):
+        nombre = _formato(url.split('/')[-1])
 
-            return [None, nombre, data.content]
-        else:
-            nombre = ''.join(caracter if caracter not in ['.', ':', '/', '?'] else '_' for caracter in url)
-            archivo = nombre + '.html'
-            if 'json' in url:
-                archivo = nombre + '.json'
-            return [nombre, archivo, data.content]
-    except Exception as e:
-        print(e)
-        return None
+        return [None, nombre]
+    else:
+        await sleep(0.0001)
+        nombre = ''.join(caracter if caracter not in ['.', ':', '/', '?'] else '_' for caracter in url)
+        archivo = nombre + '.html'
+        if 'json' in url:
+            archivo = nombre + '.json'
+        return [nombre, archivo]
 
 ###Funcion creada debido a la poca eficiencia de str.split(), esta version esta optimizada para urls
 def __split(s, *quitar):
@@ -130,32 +129,63 @@ def __split(s, *quitar):
         s = s.replace(caracter, ' ')
     return [x for x in s.split(' ') if x != '']
 
+###Extraer el un link de una linea de texto como entrada
+def _sacar_link(linea,r):
+    linea = linea.replace('\\', '')
+    busqueda = r.search(linea)
+    if busqueda != None:
+        if '.' in busqueda.group():
+            if ':' in busqueda.group() and 'http' not in busqueda.group()[:5]:
+                pass
+            else:
+                link = busqueda.group().replace('"', '')
+                if '/' not in link:
+                    link += '/'
+                return link
 
 ###Funcion para extraeer todos los links de un archivo html
 def _extraer_links(contenido):
-    patron = r'"[(http),(www)]s?\.?(.*)"'
-    s = BeautifulSoup(contenido, features='html.parser')
-    r = compile(patron)
-    links = []
-    for linea in __split(s.prettify(), *[',', ' ', ';', '\n']):
-        linea = linea.replace('\\', '')
-        x = r.search(linea)
-        if x != None:
-            if '.' in x.group():
-                if ':' in x.group() and 'http' not in x.group()[:5]:
-                    pass
-                else:
-                    link = x.group().replace('"', '')
-                    if '/' not in link:
-                        link += '/'
-                    links.append(link)
-    return links
+    try:
+        patron = r'"[(http),(www)]s?\.?(.*)"'
+        r= compile(patron)
+        links=[]
+        soup= BeautifulSoup(contenido,features='html.parser')
+        for linea in __split(soup.prettify(),*[',', ' ', ';', '\n']):
+            link= _sacar_link(linea,r)
+            if link is not None:
+                links.append(link)
+        return links
+    except:
+        return []
 
-###Funcion para descargar un archivo
-###Esta fucionada con la de filtros para que de esta forma se pueda determinar de una vez si el archivo debe descargarse
-def _descargar_archivo(nombre, contenido, ignorar):
-    if not __filtro(nombre, contenido, ignorar):
-        with open(nombre, 'wb') as file:
-            file.write(contenido)
-            file.close()
-        del file
+###Funcion para crear un archivo con el contenido proporcionado por el link
+def _crear_archivo(nombre,contenido):
+    try:
+        with open(nombre,'wb') as archivo:
+            archivo.write(contenido)
+            archivo.close()
+    except Exception as e:
+        print(e)
+
+###Funcion para descargar el contenido de un archivo
+async def aio_descargar(url):
+    try:
+        async with ClientSession() as sesion:
+            async with sesion.get(url) as data:
+                salida= await extraer_nombre(url)
+                salida.append(await data.read())
+                return salida
+    except Exception as e:
+        print(e,2)
+###Funcion para guardar los links econtrados en un archivo  txt
+def _guardar_links(links):
+    links='\n'.join(link for link in links)
+    with open('lista_links.txt','w') as archivo:
+        archivo.write(links)
+        archivo.close()
+###Funcion para guardar los hashes generados en un archivo json
+def _guardar_hashes(hashes):
+    hashes=dumps(hashes)
+    with open('lista_links.txt','w') as archivo:
+        archivo.write(hashes)
+        archivo.close()

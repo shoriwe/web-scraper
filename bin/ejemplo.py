@@ -15,11 +15,11 @@ parametros={'ig_formato':['html']}
 ### ig = diminutivo de ignorar ; formato = formato del archivo
 
 #Permite que se descarguen los archivos
-download=True
+descargar_archivos=True
 #Permite escribir un archivo con todos los links encontrados
 guardar_links=True
 #Permite crear un archivo .json con fingerprints (hash) de cada archivo encontrado
 guardar_hashes=True
 
-#scrap(url, profundidad=1, parametros={}, download=True, guardar_links=True, guardar_hashes=True)
-scrap(url,profundidad,parametros,download,guardar_links,guardar_hashes)
+#scrap(url, profundidad=1, parametros={}, descargar_archivos=True, guardar_links=True, guardar_hashes=True)
+scrap(url,profundidad,parametros,descargar_archivos,guardar_links,guardar_hashes)

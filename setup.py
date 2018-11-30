@@ -9,9 +9,10 @@ setup(
     scripts=['bin/ejemplo.py'],
     url='https://github.com/walogo/web_scrap',
     license='LICENSE.txt',
-    description='Simplificacion de web-scraping\nrequiere beautifulsoup4',
+    description='Simplificacion de web-scraping\nrequiere beautifulsoup4 y aiohttp',
     long_description=open('README.txt').read(),
     install_requires=[
         "beautifulsoup4 >= 4.6.3",
+        "aiohttp >= 3.4.4"
     ],
 )
