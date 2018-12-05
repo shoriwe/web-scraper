@@ -1,11 +1,8 @@
 from hashlib import sha3_256
 
-###Funcion para crear el finger print de un archivo sha(nombre_archivo+contenido_archivo).digest()
-def fingerprint(nombre,btes,string=True):
-    if not isinstance(nombre,bytes):
-        nombre=bytes(nombre,'utf-8')
 
-    if not string:
-        return sha3_256(nombre+btes).digest()
-    else:
-        return str(sha3_256(nombre+btes).digest())
+# Funcion para crear el finger print de un archivo sha3-256(contenido_archivo).hexdigest()
+
+# This function creates a fingerprint for a file (sha3-256sum)
+def fingerprint(btes):
+    return sha3_256(btes).hexdigest()

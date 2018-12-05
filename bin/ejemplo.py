@@ -1,25 +1,14 @@
-from scrapthor import scrap,filtros
+# noinspection PyUnresolvedReferences
+from scrapthor import scrap
 
-url='https://en.wikipedia.org/wiki/Conor_McGregor'
-
-#Profundidad a la que se va a scrapear
-profundidad=2
-
-#Parametros es un diccionario,cree una clase que es muy util para  manejar las keys que el programa puede leer
-
-##Con la clase de ayuda (filtros)
-parametros=filtros()
-parametros.ig_formato(['html'])
-##Sin la clase de ayuda
-parametros={'ig_formato':['html']}
-### ig = diminutivo de ignorar ; formato = formato del archivo
-
-#Permite que se descarguen los archivos
-descargar_archivos=True
-#Permite escribir un archivo con todos los links encontrados
-guardar_links=True
-#Permite crear un archivo .json con fingerprints (hash) de cada archivo encontrado
-guardar_hashes=True
-
-#scrap(url, profundidad=1, parametros={}, descargar_archivos=True, guardar_links=True, guardar_hashes=True)
-scrap(url,profundidad,parametros,descargar_archivos,guardar_links,guardar_hashes)
+url = 'https://en.wikipedia.org/wiki/Conor_McGregor'  # The url to scrap
+speed = 3  # The speed of asyncio (lower = more ssecure for crash) 6 <= hight speed
+debug = True  # Debug the operations
+debug_file = 'my_debug.txt'  # Out put of the debug, None for print
+parameters = {
+    'formato': ['html', 'css']}  # Parameters for the filter, in this case only download if the file format == .html
+deep = 2  # The max deep of the scraping
+download_files = True  # Download files found, if the return of the filter funtion is download, and this is == True,
+#  the scrap funtion is going to donwload the file
+scrap(url, velocidad=speed, debug=debug, debug_file=debug_file, parametros=parameters, profundidad=deep,
+      descargar_archivos=download_files)
