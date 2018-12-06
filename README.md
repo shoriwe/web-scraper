@@ -24,7 +24,7 @@ scrap(url, velocidad=speed, debug=debug, debug_file=debug_file, parametros=param
 ### #Prerequisites
 
 #### ##You need to install
-##### python3
+##### python 3.7.1
 ##### beautifulsoup4
 ##### aiohttp
 
