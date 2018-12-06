@@ -1,4 +1,4 @@
-from asyncio import get_event_loop, ProactorEventLoop, sleep
+from asyncio import sleep
 from os import mkdir, getcwd
 from os.path import join
 from sys import platform
@@ -10,8 +10,10 @@ from csv import writer
 # Crear loop paraa async
 # Create loop for async
 if platform == 'win32':
+    from asyncio import ProactorEventLoop
     _loop = ProactorEventLoop()
 else:
+    from asyncio import get_event_loop
     _loop = get_event_loop()
 
 
